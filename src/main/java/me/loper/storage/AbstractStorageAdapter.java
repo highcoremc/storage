@@ -6,11 +6,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-public abstract class AbstractStorage {
+public abstract class AbstractStorageAdapter {
 
     private final SchedulerAdapter scheduler;
 
-    public AbstractStorage(SchedulerAdapter scheduler) {
+    public AbstractStorageAdapter(SchedulerAdapter scheduler) {
         this.scheduler = scheduler;
     }
 
@@ -40,5 +40,25 @@ public abstract class AbstractStorage {
         }, this.scheduler.async());
     }
 
-    public abstract void shutdown();
+    public abstract Storage getImplementation();
+
+    public String getName() {
+        return this.getImplementation().getImplementationName();
+    }
+
+    public void init() {
+        try {
+            this.getImplementation().init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void shutdown() {
+        try {
+            this.getImplementation().shutdown();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
