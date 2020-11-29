@@ -68,7 +68,10 @@ public class RedisConnectionFactory<T> implements ConnectionFactory<StatefulRedi
 
     @Override
     public void shutdown() {
-        this.connection.close();
+        if (this.connection.isOpen()) {
+            this.connection.close();
+        }
+
         this.resources.shutdown();
         this.client.shutdown();
     }
