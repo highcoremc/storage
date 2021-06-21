@@ -1,5 +1,8 @@
 package me.loper.storage.sql;
 
+import lombok.NonNull;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +14,7 @@ import java.util.List;
 public final class SchemaReader {
     private SchemaReader() {}
 
-    public static List<String> getStatements(InputStream is) throws IOException {
+    public static List<String> getStatements(@NonNull InputStream is) throws IOException {
         List<String> queries = new LinkedList<>();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
@@ -22,7 +25,17 @@ public final class SchemaReader {
                     continue;
                 }
 
-                sb.append(line);
+                sb.append(" ").append(line.trim().toLowerCase());
+
+                // only used for PostgreSQL
+                if (
+                    StringUtils.contains(sb, "create")
+                    && StringUtils.contains(sb, "function")
+                    && StringUtils.contains(sb, "begin")
+                    && !StringUtils.contains(sb, "language")
+                ) {
+                    continue;
+                }
 
                 // check for end of declaration
                 if (line.endsWith(";")) {
