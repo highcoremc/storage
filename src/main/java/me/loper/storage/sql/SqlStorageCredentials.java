@@ -8,6 +8,7 @@ public class SqlStorageCredentials {
     private final String database;
     private final String username;
     private final String password;
+    private String poolName = "LoperSQLStorage-hikari";
     private final int maxPoolSize;
     private final int minIdleConnections;
     private final int maxLifetime;
@@ -28,6 +29,14 @@ public class SqlStorageCredentials {
         this.maxLifetime = maxLifetime;
         this.connectionTimeout = connectionTimeout;
         this.properties = properties;
+    }
+
+    public void setPoolName(String poolName) {
+        this.poolName = poolName;
+    }
+
+    public String getPoolName() {
+        return poolName;
     }
 
     public String getAddress() {

@@ -1,6 +1,6 @@
 package me.loper.storage.sql;
 
-import lombok.NonNull;
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -14,7 +14,9 @@ import java.util.List;
 public final class SchemaReader {
     private SchemaReader() {}
 
-    public static List<String> getStatements(@NonNull InputStream is) throws IOException {
+    public static List<String> getStatements(InputStream is) throws IOException {
+        Preconditions.checkArgument(is != null, "SchemaReader input stream can not be null.");
+
         List<String> queries = new LinkedList<>();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {

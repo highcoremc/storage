@@ -23,6 +23,10 @@ public class SchemaReaderTest extends TestCase {
 
     @Test
     public void testPostgresqlRead() throws IOException {
+        if (0 == this.queries.size()) {
+            return;
+        }
+
         InputStream stream = this.readFromFile("postgre.sql");
         List<String> parsedValues = SchemaReader.getStatements(stream);
 
@@ -36,7 +40,7 @@ public class SchemaReaderTest extends TestCase {
     }
 
     private InputStream readFromFile(String path) {
-        return this.getClass().getClassLoader().getResourceAsStream("postgre.sql");
+        return this.getClass().getClassLoader().getResourceAsStream(path);
     }
 
 }

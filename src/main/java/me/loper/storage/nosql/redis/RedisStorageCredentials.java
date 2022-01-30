@@ -9,13 +9,14 @@ public class RedisStorageCredentials {
     private int database = 0;
 
     private final int maxPoolSize;
-    private final int connectionTimeout;
+    private final long connectionTimeout;
 
     public RedisStorageCredentials(
-            String address, String password,
+            String address,
+            String password,
             int database,
             int maxPoolSize,
-            int connectionTimeout
+            long connectionTimeout
     ) {
         this.address = address;
         this.database = database;
@@ -43,7 +44,7 @@ public class RedisStorageCredentials {
         return this.maxPoolSize;
     }
 
-    public int getConnectionTimeout() {
+    public long getConnectionTimeout() {
         return this.connectionTimeout;
     }
 

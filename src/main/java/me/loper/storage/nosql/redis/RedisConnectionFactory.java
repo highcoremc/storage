@@ -2,12 +2,13 @@ package me.loper.storage.nosql.redis;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
-import com.lambdaworks.redis.ClientOptions;
-import com.lambdaworks.redis.RedisClient;
-import com.lambdaworks.redis.RedisURI;
-import com.lambdaworks.redis.api.StatefulRedisConnection;
-import com.lambdaworks.redis.codec.RedisCodec;
-import com.lambdaworks.redis.resource.DefaultClientResources;
+import io.lettuce.core.ClientOptions;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+import io.lettuce.core.TimeoutOptions;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.codec.RedisCodec;
+import io.lettuce.core.resource.DefaultClientResources;
 import me.loper.storage.ConnectionFactory;
 import me.loper.storage.nosql.redis.serializer.JsonByteBufferSerializer;
 
@@ -15,6 +16,8 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -47,11 +50,18 @@ public class RedisConnectionFactory<T> implements ConnectionFactory<StatefulRedi
     public void init() {
         this.resources = DefaultClientResources.builder()
                 .ioThreadPoolSize(credentials.getMaxPoolSize())
-                .computationThreadPoolSize(credentials.getMaxPoolSize())
                 .build();
 
+        Duration duration = Duration.ofMillis(credentials.getConnectionTimeout());
+        TimeoutOptions connectionTimeout = TimeoutOptions.builder()
+            .fixedTimeout(duration).build();
+
+        ClientOptions clientOptions = ClientOptions.builder()
+            .timeoutOptions(connectionTimeout)
+            .autoReconnect(true).build();
+
         this.client = RedisClient.create(resources, createRedisURI(credentials));
-        this.client.setOptions(ClientOptions.builder().autoReconnect(true).build());
+        this.client.setOptions(clientOptions);
     }
 
     private RedisURI createRedisURI(RedisStorageCredentials credentials) {
@@ -66,7 +76,7 @@ public class RedisConnectionFactory<T> implements ConnectionFactory<StatefulRedi
 
         uri.setHost(address);
         uri.setPort(port);
-        uri.setTimeout(credentials.getConnectionTimeout());
+        uri.setTimeout(Duration.of(credentials.getConnectionTimeout(), ChronoUnit.MILLIS));
 
         if (0 != credentials.getDatabase()) {
             uri.setDatabase(credentials.getDatabase());
@@ -91,8 +101,8 @@ public class RedisConnectionFactory<T> implements ConnectionFactory<StatefulRedi
 
     @Override
     public StatefulRedisConnection<String, T> getConnection() {
-        if (connection == null || !connection.isOpen()) {
-            connection = client.connect(this.codec);
+        if (this.connection == null) {
+            this.connection = this.client.connect(this.codec);
         }
 
         return this.connection;
