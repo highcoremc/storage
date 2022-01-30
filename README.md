@@ -16,6 +16,6 @@ Simple storage component-abstraction for paper/bungee minecraft plugins.
 <dependency>
     <groupId>com.github.loperd</groupId>
     <artifactId>storage</artifactId>
-    <version>1.0</version>
+    <version>1.4.1</version>
 </dependency>
 ```
